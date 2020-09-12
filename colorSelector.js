@@ -8,12 +8,16 @@ function initColorPicker(){
 
         modelController(event.target.value); // dette er vores hex-værdi
     });
+    document.querySelector("select").addEventListener("change", () => {
+        let color = document.querySelector("#colorPicker").value;
+        modelController(color);
+    })
 }
 
 function modelController(hex) { 
     let rgb = hexToRgb(hex);
     let hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-    getColorArray(getHarmony(hsl));
+    viewController(getColorArray(getHarmony(hsl)));
 }
 
 function hexToRgb(hex) {
@@ -104,6 +108,28 @@ function getHarmony(hsl) {
       break;
     }
 
+    // her laves et loop - noget med under 0 skal der tillægges 360 for h. -+ 100 på s og l
+    hslArray.forEach(element => {
+      if(element.h < 0) {
+        element.h = element.h+360;
+      }
+      if(element.h > 360) {
+        element.h = element.h - 360;
+      }
+      if(element.l < 0){
+        element.l = element.l + 360;
+      }
+      if(element.l > 360){
+        element.l = element.l - 360;
+      }
+      if(element.s < 0){
+        element.s = element.s + 360;
+      }
+      if(element.s > 360){
+        element.s = element.s - 360;
+      }
+      
+    });
     return hslArray;
 
 }
@@ -117,36 +143,78 @@ function getAnalogue(hsl) {
   hslArray[1] = {h: hsl.h - 20, s: hsl.s, l: hsl.l};
   hslArray[3] = {h: hsl.h + 20, s: hsl.s, l: hsl.l};
   hslArray[4] = {h: hsl.h + 40, s: hsl.s, l: hsl.l};
+ 
 
   return hslArray;
 
 }
-// function getMonochromatic(hsl) {
-// }
+function getMonochromatic(hsl) {
 
-// function getTriad(hsl) {
-// }
+  let hslArray = new Array(5);
+  hslArray[0] = hsl;
 
-// function getComplementary(hsl) {
-// }
+  hslArray[1] = {h: hsl.h, s: hsl.s, l: hsl.l + 10};
+  hslArray[2] = {h: hsl.h, s: hsl.s, l: hsl.l + 20};
+  hslArray[3] = {h: hsl.h, s: hsl.s, l: hsl.l + 30};
+  hslArray[4] = {h: hsl.h, s: hsl.s, l: hsl.l + 40};
 
-// function getCompound(hsl) {
-// }
+  return hslArray;
+ }
 
-// function getShades(hsl) {
-// }
+function getTriad(hsl) {
+  let hslArray = new Array(3);
+  hslArray[0] = hsl;
+
+  hslArray[1] = {h: hsl.h + 60, s: hsl.s, l: hsl.l};
+  hslArray[2] = {h: hsl.h + 120, s: hsl.s, l: hsl.l};
+
+  return hslArray;
+}
+
+function getComplementary(hsl) {
+  let hslArray = new Array(2);
+  hslArray[0] = hsl;
+
+  hslArray[1] = {h: hsl.h + 180, s: hsl.s, l: hsl.l};
+
+  return hslArray;
+}
+
+function getCompound(hsl) {
+  let hslArray = new Array(5);
+  hslArray[0] = hsl;
+
+  hslArray[1] = {h: hsl.h + 180, s: hsl.s, l: hsl.l};
+  hslArray[2] = {h: hsl.h - 20, s: hsl.s, l: hsl.l};
+  hslArray[3] = {h: hsl.h + 20, s: hsl.s, l: hsl.l};
+  hslArray[4] = {h: hsl.h + 40, s: hsl.s, l: hsl.l};
+
+  return hslArray;
+}
+
+function getShades(hsl) {
+
+  let hslArray = new Array(5);
+  hslArray[0] = hsl;
+
+  hslArray[1] = {h: hsl.h, s: hsl.s, l: hsl.l + 20};
+  hslArray[2] = {h: hsl.h, s: hsl.s, l: hsl.l - 20};
+  hslArray[3] = {h: hsl.h, s: hsl.s, l: hsl.l + 40};
+  hslArray[4] = {h: hsl.h, s: hsl.s, l: hsl.l - 40};
+
+  return hslArray;
+}
 
 
 function getColorArray(hslArray) {
 
   let colorArray = hslArray.map(hsl => {
-    let rgb = hslToRgb(h, s, l);
+    let rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
     let hex = rgbToHex(rgb);
     
     return {hsl, hex, rgb};
   });
-
-  console.log(colorArray);
+  return colorArray;
 
   
 }
@@ -208,13 +276,33 @@ function rgbToHex(rgb) {
 }
 
 
-function viewController(array) {
+function viewController(colorArray) {
+  let colors = document.querySelectorAll(".colorWrapper");
+
+  for(let i=0; i < colors.length; i++) {
+    colors[i].classList.remove("hide");
+    if(colorArray[i]){
+      showBackgroundColor(colorArray[i].hex, colors[i]);
+    showColorCodes(colorArray[i], colors[i]);
+    } else{
+      hideColor(colors[i]);
+    }
+  }
+
 }
 
-function showColorCodes(){
+function hideColor(element) {
+  element.classList.add("hide");
 }
 
-function showBackgroundColor(hex) {
-  document.querySelector(".color").style.backgroundColor = hex;
+function showColorCodes(colorObj, element){
+  element.querySelector(".HEX span").innerHTML = colorObj.hex;
+  element.querySelector(".RGB span").innerHTML = colorObj.rgb.r + ", " + colorObj.rgb.g + ", " + colorObj.rgb.b;
+  element.querySelector(".HSL span").innerHTML = `hsl(%${colorObj.hsl.h}, %${colorObj.hsl.s}, %${colorObj.hsl.l})`;
+
+}
+
+function showBackgroundColor(hex, element) {
+  element.querySelector(".color").style.backgroundColor = hex;
 }
 
