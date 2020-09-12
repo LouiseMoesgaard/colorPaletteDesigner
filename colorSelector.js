@@ -14,10 +14,10 @@ function initColorPicker(){
     })
 }
 
-function modelController(hex) { 
+function modelController(hex) {  //tager hex-værdien som parameter
     let rgb = hexToRgb(hex);
     let hsl = rgbToHsl(rgb.r, rgb.g, rgb.b);
-    viewController(getColorArray(getHarmony(hsl)));
+    viewController(getColorArray(getHarmony(hsl))); //viewController kører funktionen getColorArray, som kører getHarmony.
 }
 
 function hexToRgb(hex) {
@@ -76,13 +76,13 @@ function rgbToHsl(r, g, b) {
     return {h, s, l};
 }
 
-function getHarmony(hsl) {
+function getHarmony(hsl) { //styrer den valgte harmony i selecten. 
     let select = document.querySelector("select");
     let selectedValue = select.options[select.selectedIndex].value;
 
     let hslArray; 
 
-    switch(selectedValue){
+    switch(selectedValue){ //switch i stedet for en if-sætning, som er mere overskuelig i dette tilfælde
       case 'analogous':
        hslArray = getAnalogue(hsl);
       break;
@@ -108,7 +108,7 @@ function getHarmony(hsl) {
       break;
     }
 
-    // her laves et loop - noget med under 0 skal der tillægges 360 for h. -+ 100 på s og l
+    // her laves et loop, så vi ikke får minusværdier. Vi arbejder med en cirkel, og derfor skal vi sætte alle hsl værdier til at være indenfor 0 og 360.
     hslArray.forEach(element => {
       if(element.h < 0) {
         element.h = element.h+360;
@@ -206,9 +206,9 @@ function getShades(hsl) {
 }
 
 
-function getColorArray(hslArray) {
+function getColorArray(hslArray) { // tager alle vores Hsl-værdier fra colorArray og convertere det til et obj, som indeholder alle farvekoder. 
 
-  let colorArray = hslArray.map(hsl => {
+  let colorArray = hslArray.map(hsl => { // looper igennem arrayet og map returnere det som elementet i arrayet skal blive til. Det bliver til et obj af både rgb, hsl og hex
     let rgb = hslToRgb(hsl.h, hsl.s, hsl.l);
     let hex = rgbToHex(rgb);
     
@@ -279,12 +279,12 @@ function rgbToHex(rgb) {
 function viewController(colorArray) {
   let colors = document.querySelectorAll(".colorWrapper");
 
-  for(let i=0; i < colors.length; i++) {
-    colors[i].classList.remove("hide");
-    if(colorArray[i]){
-      showBackgroundColor(colorArray[i].hex, colors[i]);
-    showColorCodes(colorArray[i], colors[i]);
-    } else{
+  for(let i=0; i < colors.length; i++) { // looper igennem alle colors, som er alle farverne i min colorWrapper.
+    colors[i].classList.remove("hide"); // man skal fjerne hide igen inden funktionen skal køre igen, hvis dette er tilføjet ved enkelte harmornier.
+    if(colorArray[i]){ //hvis index i, eksistrer i colorArray
+      showBackgroundColor(colorArray[i].hex, colors[i]); // tilføjer farve til det element baggrundsfarve, som loopet er kommet til. (bruger hex) 
+    showColorCodes(colorArray[i], colors[i]); // tilføjer farvekoderne til det element loopet er nået til 
+    } else{ // ellers fjernes elementen i det pågældende index.
       hideColor(colors[i]);
     }
   }
